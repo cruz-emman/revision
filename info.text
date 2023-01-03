@@ -1,0 +1,4 @@
+MONGO_URL=mongodb+srv://admin:admin@tua.nqbq2xi.mongodb.net/Ecommerce?retryWrites=true&w=majority
+PASSWORD_SEC = admin1223
+JWT_KEY = admin123
+SENDGRIDAPI = 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
