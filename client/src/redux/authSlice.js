@@ -5,6 +5,7 @@ export const authSlice = createSlice({
     initialState: {
         currentUser: null,
         isFetching : false,
+        isStatus : false,
         isError: false,
         isSuccess: false,
         isUpdated: false,
@@ -40,12 +41,23 @@ export const authSlice = createSlice({
         loginSuccess: (state, action) =>{
             state.isFetching = true;
             state.isSuccess = true;
-            state.currentUser = action.payload
+            state.isStatus = true;
+            state.currentUser = action.payload;
+            state.isMessage = "Login Success!";
+        },
+        loginNotActive: (state, action) =>{
+            state.isFetching = true;
+            state.isStatus = false;
+            state.isSuccess = true;
+            state.currentUser = action.payload;
+            state.isMessage = "Account is still pending...";
         },
         loginFailure: (state) =>{
             state.isSuccess = false;
             state.isFetching = false;
             state.isError = true;
+            state.isMessage = "Wrong Username or Password!";
+
         }, 
         logOut: (state) =>{
             state.currentUser = null;
@@ -54,5 +66,5 @@ export const authSlice = createSlice({
 
 })
 
-export const {registerStart, registerSuccess, registerFailure, resetState, loginStart, loginSuccess, loginFailure, logOut} = authSlice.actions;
+export const {registerStart,loginNotActive, registerSuccess, registerFailure, resetState, loginStart, loginSuccess, loginFailure, logOut} = authSlice.actions;
 export default authSlice.reducer

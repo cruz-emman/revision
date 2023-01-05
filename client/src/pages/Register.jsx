@@ -1,5 +1,5 @@
 import { Box, Button, Container, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
-import React, {useState} from 'react'
+import React, {useRef, useState} from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import login from '../assets/banner.jpg'
 import TuaLogo from '../assets/tua.png'
@@ -9,17 +9,21 @@ import { registerUser } from '../redux/apiCalls'
 import { useEffect } from 'react'
 import { toast } from 'react-toastify'
 import { resetState } from '../redux/authSlice'
+import emailjs from '@emailjs/browser';
+
+
 
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const ID_REGEX = /^[0-9]{10}$/;
-const CONTACT_REGEX = /^(09|\+639)\d{9}$/;
+const CONTACT_REGEX = /^[0-9]{1,10}$/;
 
 const Register = () => {
   const {isError, isSuccess} = useSelector((state) =>  state.auth)
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const form = useRef()
 
   useEffect(() =>{
   
@@ -39,20 +43,30 @@ const Register = () => {
       dispatch(resetState())
   },[dispatch, isSuccess])
 
+  
+
   const {register, handleSubmit, watch , unregister, formState: {errors}} = useForm({
     firtname: '',
     middlename: '',
     lastname: '',
     email: '',
     department: '',
+    contactNumber: '',
     password: '',
     studentId: ''
   })
     
 
-  const onSubmit =  ({firstname, middlename, lastname, email, password, studentId, department}) => {
-    let user = {firstname, middlename, lastname, email, password, studentId, department}
+  const onSubmit =  ({firstname, middlename, lastname, email, password, studentId, department,contactNumber}) => {
+    let user = {firstname, middlename, lastname, email, password, studentId, department,contactNumber}
     registerUser(user,dispatch)
+    
+    emailjs.sendForm('gmail','template_3ju5i3p', form.current,'Qzg9HMQGgYrGO_WPM')
+      .then((result) =>{
+        console.log("Success", result.status, result.text)
+      },(error) =>{
+        console.log("Failed", error)
+      })
     
   }
 
@@ -77,7 +91,7 @@ const Register = () => {
                     </Box>
                     <Typography my={2} sx={{ typography: {xs: 'body1', md: 'h5'}}}>E-Benta || TUA-MARKETPLACE</Typography>
 
-                    <form onSubmit={handleSubmit(onSubmit)} style={{display: "flex", flexDirection: 'column',gap: '10px', width: '100%'}}>
+                    <form ref={form} onSubmit={handleSubmit(onSubmit)} style={{display: "flex", flexDirection: 'column',gap: '10px', width: '100%'}}>
                         <Box sx={{display:'flex', alignItems:'center', justifyContent:'space-between', gap: '5px'}}>
                           <TextField   
                               variant="outlined"
@@ -131,6 +145,21 @@ const Register = () => {
                             error={!!errors?.studentId}
                             helperText={errors?.studentId ? errors.studentId.message: null}
                         />
+                        <Box sx={{display: 'flex', alignItems:'center', gap: 1}}>
+                          <TextField sx={{width: "12%"}} value="+63" variant='outlined' disabled />
+                        <TextField   
+                            variant="outlined"
+                            name="contactNumber"
+                            label="Contact Number"
+                            required
+                            fullWidth
+                            type="text"
+                            autoComplete='password'
+                            {...register('contactNumber', {required: "Required", pattern: {value: CONTACT_REGEX,  message: "Please input your contact number properly" }})}
+                            error={!!errors?.contactNumber}
+                            helperText={errors?.contactNumber ? errors.contactNumber.message: null}
+                        />
+                        </Box>
                           <FormControl fullWidth>
                             <InputLabel id="demo-simple-select-label">Department</InputLabel>
                               <Select
@@ -181,7 +210,7 @@ const Register = () => {
                             error={!!errors?.password1}
                             helperText={errors?.password1 ? errors.password1.message: null}
                           />
-                        <Button fullWidth type="submit" variant="contained">Login</Button>
+                        <Button fullWidth type="submit" variant="contained">Register</Button>
 
                       </form>
 

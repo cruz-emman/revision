@@ -12,12 +12,13 @@ import { resetState } from '../redux/authSlice'
 
 
 const Login = () => {
+  
   const ID_REGEX = /^[0-9]{10}$/;
   const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
   const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const {isError, currentUser} = useSelector((state) => state.auth)
+  const {isError, currentUser, isMessage,isSuccess,isStatus} = useSelector((state) => state.auth)
 
   const {register, handleSubmit, formState: {errors}} = useForm({
     studentId: '',
@@ -28,19 +29,28 @@ const Login = () => {
 
   useEffect(() =>{
     if(isError){
-      toast.error("Invaild Student ID or Password, Contact Admin...")
+      toast.error(isMessage)
+      console.log("Error")
+
     }
     dispatch(resetState())
   },[dispatch, isError])
 
+
   useEffect(() =>{
-    if(currentUser){
-      toast.success("Login Successfully")
-      navigate('/')
+    if(isSuccess){
+      if(isStatus){
+        if(currentUser){
+          toast.success("Login Successfully")
+          navigate('/')
+        }
+      }else{
+        toast.info(isMessage)
+        dispatch(resetState())
+      }
     }
 
-  },[dispatch, currentUser])
-
+},[dispatch, currentUser,isStatus,isMessage,isSuccess])
 
   const onSubmit = ({studentId,password}) =>{
     let user ={studentId, password}
@@ -103,7 +113,7 @@ const Login = () => {
                           <Button  variant="text">Register Here</Button>
                         </Link>
 
-                        <Typography>Forgot Password? email tuamarketplace@gmail.com</Typography>
+                        <Typography>Forgot Password? email tua.ebentamarket@gmail.com</Typography>
                       </Box>
               </Box>
             </Box>

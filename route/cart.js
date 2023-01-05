@@ -147,4 +147,49 @@ router.post("/", async (req, res) => {
   }
 
  })
+
+
+
+
+
+ //nabili ni user
+ router.get("/totalbuy/:id", async (req, res) => {
+  const { id } = req.params
+  const buyerId = mongoose.Types.ObjectId(id)
+
+  try {
+    const income = await Cart.aggregate([ 
+    {
+      $match: {status: "complete", userId: buyerId}
+    },
+    {$group: {_id: buyerId, total: {$sum: "$TotalAmount"}}}
+    
+
+    ])
+    res.status(200).json(income);
+  } catch (err) {
+    res.status(500).json({err: err.message});
+  }
+});
+
+
+//previous transactions ni user (list ng nabili nya)
+router.get('/recentBuy/:id', async (req,res) =>{
+  const { id } = req.params;
+
+  try {
+    const orders = await Cart.find({userId: id }).sort({createdAt: -1})
+                  .populate([
+                    {path: 'userId', select: 'firstname lastname studentId' },
+                    {path: 'productId', select: 'title img status quantity' },
+                    {path: 'sellerId', select: 'firstname lastname studentId department' }
+                  ]).exec()
+                                  
+    res.status(200).json(orders);     
+  }
+     catch (error) {
+    res.status(500).json({message: error.message});
+    console.log({message: error.message});
+  }
+})
   export default router

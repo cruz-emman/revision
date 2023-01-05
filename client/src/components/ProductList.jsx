@@ -21,7 +21,6 @@ const ProductList = ({products, category,singleProduct}) => {
       return (item?.seller_id?._id !== auth )       
     })
     setFilteredProducts(data)
-    console.log(data)
     setLoading(false)
   },[pageSize,setFilteredProducts,category,setPageSize,setPage,singleProduct])
 

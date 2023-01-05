@@ -1,5 +1,5 @@
 import { publicRequest, userRequest } from "../publicRequest"
-import { loginFailure, loginStart, loginSuccess, registerFailure, registerStart, registerSuccess, resetState } from "./authSlice"
+import { loginFailure, loginNotActive, loginStart, loginSuccess, registerFailure, registerStart, registerSuccess, resetState } from "./authSlice"
 import { addProductFailure, addProductStart, addProductSuccess, deleteProductFailure, deleteProductStart, deleteProductSuccess } from "./productSlice"
 import {updateFailure, updateStart, updateSuccess} from './userSlice'
 
@@ -20,7 +20,12 @@ export const registerUser = async (user, dispatch) => {
     dispatch(loginStart());
     try {
       const res = await publicRequest.post("/auth/login", user);
-      dispatch(loginSuccess(res.data));
+      if(res.data.status === "active"){
+        dispatch(loginSuccess(res.data));
+      }
+      else if(res.data.status === "pending"){
+        dispatch(loginNotActive(res.data))
+      }
     } catch (err) {
       dispatch(loginFailure());
     }

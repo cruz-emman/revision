@@ -4,7 +4,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
-import React from 'react'
+import React, { useRef } from 'react'
 import Navbar from '../components/Navbar'
 import { useDispatch, useSelector } from 'react-redux'
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { publicRequest, userRequest } from '../publicRequest'
 import { toast } from 'react-toastify'
 import BeatLoader from "react-spinners/BeatLoader";
-import {sendEmail} from '../utils/sendEmail'
+import emailjs from '@emailjs/browser';
 import axios from 'axios'
 
 
@@ -29,7 +29,9 @@ const Cart = () => {
     const [productQuantity, setProductQuantity] = useState(0)
     const [loading, setLoading] = useState(true)
     const soldItem = cart?.products[0]?.quantity
+    const [getUserEmail, setUserEmail] = useState()
 
+    const form = useRef();
 
 
     // console.log(cart.products[0]._id)
@@ -37,8 +39,7 @@ const Cart = () => {
     const navigate = useNavigate()
 
     const handleClick =(id,price) =>{
-        const itemPrice = Number(price)
-        dispatch(deleteProduct({id,quantity: cart.quantity, price: itemPrice}))
+        dispatch(deleteProduct({id,quantity: cart.quantity, price: price}))
     } 
 
 
@@ -50,6 +51,7 @@ const Cart = () => {
                     setGetProductId(cart.products[0]?._id)      
                     const res = await userRequest.get(`/products/find/${cart.products[0]?._id}`)
                     setProductQuantity(res.data.quantity)
+                    setUserEmail(currentUser.email)
                     setLoading(false)
                 } catch (error) {
                     console.log({error: error.messsage})
@@ -75,69 +77,13 @@ const Cart = () => {
     };
 
 
-
-    const handleSubmit = async (e) =>{
-        
-        e.preventDefault()
-        //const getSellerId = cart.products.map((item) => console.log(item.user_id.studentId))
-        if(orderSummary?.location === ""){
-           toast.error("Please input location..")
-        }else{
-            try {
-                await userRequest.post(`/order`,{
-                       //userId here is the one who is login, i'm trying to get the seller of the product
-                       userId: currentUser._id,
-                       products: cart.products.map((item) =>({
-                           productId: item._id,
-                           quantity: item.quantity,
-                           sellerId: item.seller_id._id,
-                           
-                       }
-                       )),
-                       amount: cart.total,
-                       time: value,
-                       location: orderSummary.location,
-                       boughtItem: soldItem
-                   }) 
-               } catch (error) {
-                   toast.error("Please put a Location and Time!")
-               }
-        }
-        
-    }
-
-
-
-    // const checkBox = async (id, title, amount) =>{
-    //         try {
-    //             let res = await publicRequest.get(`/products/find/${id}`)
-    //             await publicRequest.post(`/cart`,{
-    //                 userId: currentUser._id,
-    //                 sellerId: res.data.seller_id._id,
-    //                 productId: id,
-    //                 time: value,
-    //                 TotalAmount: amount,
-    //                 location: orderSummary.location,
-    //                 ordered: true
-    //             })
-    //             await userRequest.put(`/products/${getProductId}`, {
-    //                 quantity: (productQuantity - soldItem)
-                    
-    //             })
-    //             //console.log(res.data.seller_id._id)
-    //         } catch (error) {
-                
-    //         }
-    //    // console.log(id, title, amount, orderSummary.location, value)
-    // }
-
-
-    const [checked, setChecked] = useState(false);
-
     
 
+
     const confirmProduct = async (id, title,amount,qty) =>{
+                
                 try {
+                    
                 let res = await publicRequest.get(`/products/find/${id}`)
                 await publicRequest.post(`/cart`,{
                     userId: currentUser._id,
@@ -153,11 +99,27 @@ const Cart = () => {
                     quantity: (productQuantity - soldItem)
                     
                 })
+                
+                
+
+                toast.success("Order was successfully")
                 dispatch(deleteProduct({id,quantity: cart.quantity}))
+                setOpen(false)
             } catch (error) {
                 
             }
 
+    }
+
+    const sendEmail  = (e) =>{
+        e.preventDefault()
+        console.log("Submit")
+        emailjs.sendForm('gmail','template_v9cfyxa', form.current,'Qzg9HMQGgYrGO_WPM')
+        .then((result) =>{
+          console.log("Success", result.status, result.text)
+        },(error) =>{
+          console.log("Failed", error)
+        })
     }
 
     
@@ -211,7 +173,6 @@ const Cart = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell></TableCell>
                                     <TableCell>Product</TableCell>
                                     <TableCell>Price</TableCell>
                                     <TableCell>Qty</TableCell>
@@ -226,22 +187,21 @@ const Cart = () => {
                     <TableBody>
                     
                     {cart.products.map((product, i) =>(
-                        <TableRow key={product._id}>
-                            <TableCell>
-                                
-                            </TableCell>
+                       // <form ref={form} onSubmit={onSubmit}>
+
+                        <TableRow key={i}>
                             <TableCell>
                                 <Box sx={{display: 'flex', alignItems:'center', gap: 2}}>
                                     <Box component="img" sx={{height: '60px', width: '60px'}} src={product.img} />{product.title}
                                 </Box>
 
                             </TableCell>
-                            <TableCell>₱ {product.price}</TableCell>
+                            <TableCell> ₱ {product.price}</TableCell>
                             <TableCell>{product.quantity}</TableCell>
-                            <TableCell>₱ {Number(product.quantity * product.price)}</TableCell>
+                            <TableCell> ₱ {Number(product.quantity * product.price)}</TableCell>
                             <TableCell>
                                 <TextField 
-                                    required         
+                                    required     
                                     variant="outlined"
                                     value={orderSummary.location || ""}
                                     placeholder='Click Order'
@@ -276,6 +236,8 @@ const Cart = () => {
                                             <TextField 
                                                 onChange={(e) => setOrderSummary({location: e.target.value})}   
                                                 required         
+                                                name="location"   
+
                                                 variant="standard"
                                                 placeholder='e.g gym, guardhouse, canteen' />
                                         </Box>
@@ -287,6 +249,7 @@ const Cart = () => {
                                     <DateTimePicker
                                         label="Date&Time picker"
                                         value={value || ""}
+                                        name="date"
                                         onChange={handleChange}   
                                         renderInput={(params) => <TextField {...params} />}
                                     />
@@ -300,10 +263,14 @@ const Cart = () => {
                                             <Typography variant="subtitle1" fontWeight={700} color="text.secondary">amount to Pay: </Typography>
                                             <Typography variant="h6">₱ {Number(product.quantity * product.price)}</Typography>
                                         </Box>
-                                        <Button variant="contained" onClick={(e) =>confirmProduct(product._id, product.title, Number(product.quantity * product.price ),
-                                              product.quantity, product.price)}>
-                                            Confirm Order
-                                        </Button>
+                                        <form ref={form} onSubmit={sendEmail}>
+                                        <input hidden name="title" defaultValue={product.title}  />
+                                                <Button variant="contained" type="submit" onClick={(e) =>confirmProduct(product._id, product.title, Number(product.quantity * product.price ),
+                                                product.quantity, product.price)}>
+                                                Confirm Order
+                                            </Button>
+                                        </form>
+           
                                     </Box>
                                     </Box>
                                     </Modal>
@@ -311,12 +278,12 @@ const Cart = () => {
 
                             <TableCell>
                                 <Box sx={{display: 'flex', alignItems:'center', gap: 1}}>
-                                    <Button color="success" variant="contained" onClick={handleOpen}
+                                    <Button color="success" type="submit" variant="contained" onClick={handleOpen}
                                     startIcon={<BorderColorIcon />}
                                     >
                                         Order
                                     </Button>
-                                    <Button color="error" onClick={() => handleClick(product._id, product.price)} startIcon= 
+                                    <Button color="error" onClick={(e) => handleClick(product._id, product.price)} startIcon= 
                                      {<DeleteIcon />} 
                                      variant="contained">
                                         Remove
@@ -324,7 +291,9 @@ const Cart = () => {
                                 </Box>
                                 
                             </TableCell>
+                            
                         </TableRow>
+
                     ))}
                     </TableBody>
                     </Table>

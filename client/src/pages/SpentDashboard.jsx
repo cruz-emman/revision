@@ -124,7 +124,7 @@ const SpentDashboard = () => {
                 <Box  sx={{display: 'flex', width: '100%', flexDirection: 'column', justifyContent: 'center', alingItems:'center', gap: 5}}>
 
                     <Box sx={{display:'flex', justifyContent: 'space-evenly', gap:2, flexDirection: {xs: 'column', md: 'row'}, width: '100%'}}>
-                        <Paper  elevation={3} sx={{width: '100%', padding: 2}}>
+                        <Paper  elevation={3} flex={2} sx={{width: '100%', padding: 2}}>
                             <Box sx={{display:'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2}}>
                             <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                                     <Typography variant="body1" fontWeight={700} color="text.disabled">Income (SELL) </Typography>
@@ -135,7 +135,7 @@ const SpentDashboard = () => {
                             </Box>
                         </Paper>
                     
-                        <Paper  elevation={3} sx={{width: '100%', padding: 2}}>
+                        <Paper  elevation={3} sx={{width: '50%', padding: 2}}>
                             <Box sx={{display:'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: 2}}>
                                 <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
                                     <Typography variant="body1" fontWeight={700} color="text.disabled">Spent (BUY) </Typography>

@@ -56,12 +56,13 @@ router.post('/login', async (req,res) =>{
     
             const {password, ...others} = studentId._doc
 
-            if(others.status === 'active'){
-                res.status(200).json({...others, acessToken})
-            }
-            else{
-                res.status(404).json("Account still Pending")
-            }        
+            res.status(200).json({...others, acessToken})
+
+            // if(others.status === 'active'){
+            // }
+            // else{
+            //     res.status(203).json("Account still Pending")
+            // }        
 
         } catch (error) {
         res.status(400).json(error)
