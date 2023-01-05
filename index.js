@@ -6,6 +6,7 @@ import userRouter from './route/user.js'
 import productRouter from './route/product.js'
 import cartRouter from './route/cart.js'
 import orderRouter from './route/order.js'
+import path from 'path'
 const PORT = process.env.PORT || 5000
 
 const app = express()
