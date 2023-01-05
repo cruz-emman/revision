@@ -13,6 +13,7 @@ mongoose.set("strictQuery", false);
 
 const dbConnect = async () =>{
     try {
+        mongoose.set("strictQuery", false);
         await mongoose.connect("mongodb+srv://admin:admin@tua.nqbq2xi.mongodb.net/Ecommerce?retryWrites=true&w=majority")
         console.log("Database is connected to MongoDB")
 
@@ -29,6 +30,12 @@ app.use('/api/users', userRouter)
 app.use('/api/products', productRouter)
 app.use('/api/cart', cartRouter)
 app.use('/api/order', orderRouter)
+
+const __dirname = path.resolve()
+app.use(express.static(path.join(__dirname,'/client/build')));
+app.get("*", (req,res) =>{
+    res.sendFile(path.join(__dirname, '/client/build/index.html'))
+})
 
 
 
